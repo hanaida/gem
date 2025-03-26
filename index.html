@@ -1,227 +1,245 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>보석 강화 시뮬레이터</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        .status { font-size: 24px; margin-top: 20px; font-weight: bold; }
-        .success { color: green; }
-        .keep { color: blue; }
-        .fail { color: orange; }
-        .destroy { color: red; }
-        .probability { font-size: 16px; margin-top: 10px; color: darkblue; }
-        button:disabled { background-color: gray; color: white; cursor: not-allowed; }
-        
-        /* 기존 스타일 유지 */
-        button {
-            font-size: 12px;
-            padding: 5px 10px;
-            margin: 5px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>보석 강화 시뮬레이터</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; }
+    .status { font-size: 24px; margin-top: 20px; font-weight: bold; }
+    .success { color: green; }
+    .keep { color: blue; }
+    .fail { color: orange; }
+    .destroy { color: red; }
+    .probability { font-size: 16px; margin-top: 10px; color: darkblue; }
+    button:disabled { background-color: gray; color: white; cursor: not-allowed; }
+    
+    /* 기존 스타일 유지 */
+    button {
+      font-size: 12px;
+      padding: 5px 10px;
+      margin: 5px;
+    }
 
-        /* 아이템 버튼 스타일 (정사각형 + 이미지 적용) */
-        .item-button {
-            width: 80px;
-            height: 80px;
-            border: none;
-            background-size: cover;
-            background-position: center;
-            font-size: 0; /* 텍스트 숨김 */
-            transition: filter 0.2s;
-        }
-        /* 활성화된 아이템 버튼은 어둡게 표시 */
-        .active {
-            filter: brightness(70%);
-        }
+    /* 아이템 버튼 스타일 (정사각형 + 이미지 적용) */
+    .item-button {
+      width: 80px;
+      height: 80px;
+      border: none;
+      background-size: cover;
+      background-position: center;
+      font-size: 0; /* 텍스트 숨김 */
+      transition: filter 0.2s;
+    }
+    /* 활성화된 아이템 버튼은 어둡게 표시 */
+    .active {
+      filter: brightness(70%);
+    }
 
-        #buffButton {
-            background-image: url('마법의_연마제.png');
-        }
+    #buffButton {
+      background-image: url('마법의_연마제.png');
+    }
 
-        #nerfButton {
-            background-image: url('명장의_망치.png');
-        }
+    #nerfButton {
+      background-image: url('명장의_망치.png');
+    }
 
-        #doomBookButton {
-            background-image: url('파멸의_제작서.png');
-        }
+    #doomBookButton {
+      background-image: url('파멸의_제작서.png');
+    }
 
-        #goblinLensButton {
-            background-image: url('고블린의_렌즈.png');
-        }
+    #goblinLensButton {
+      background-image: url('고블린의_렌즈.png');
+    }
 
-        #specialButton {
-            background-image: url('직업_제련템.png');
-        }
-    </style>
+    #specialButton {
+      background-image: url('직업_제련템.png');
+    }
+
+    /* 고대의 제작서 버튼 서식 */
+    #ancientBookButton {
+      background-image: url('고대의_제작서.png');
+    }
+  </style>
 </head>
 <body>
 
-    <h1>보석 강화 시뮬레이터</h1>
-    <p>현재 강화 단계: <span id="currentLevel">1</span></p>
-    <p class="probability" id="probabilityInfo">강화 확률을 불러오는 중...</p>
-    <p class="status" id="statusMessage">강화 대기 중...</p>
-    <!-- 보석 상태 이미지를 위한 태그 추가 (가운데 정렬) -->
-    <img id="gemImage" src="" alt="보석 상태 이미지" style="display:none; margin: 20px auto 0; width:100px; height:100px;">
+  <h1>보석 강화 시뮬레이터</h1>
+  <p>현재 강화 단계: <span id="currentLevel">1</span></p>
+  <p class="probability" id="probabilityInfo">강화 확률을 불러오는 중...</p>
+  <p class="status" id="statusMessage">강화 대기 중...</p>
+  <!-- 보석 상태 이미지를 위한 태그 추가 (가운데 정렬) -->
+  <img id="gemImage" src="" alt="보석 상태 이미지" style="display:none; margin: 20px auto 0; width:100px; height:100px;">
 
-    <button onclick="upgrade()">강화하기</button>
-    <br><br>
-    <button id="buffButton" class="item-button" onclick="toggleItem('buff')"></button>
-    <button id="nerfButton" class="item-button" onclick="toggleItem('nerf')"></button>
-    <button id="doomBookButton" class="item-button" onclick="toggleItem('doom')"></button>
-    <button id="goblinLensButton" class="item-button" onclick="toggleItem('lens')"></button>
-    <button id="specialButton" class="item-button" onclick="toggleItem('special')"></button>
+  <button onclick="upgrade()">강화하기</button>
+  <br><br>
+  <button id="buffButton" class="item-button" onclick="toggleItem('buff')"></button>
+  <button id="nerfButton" class="item-button" onclick="toggleItem('nerf')"></button>
+  <button id="ancientBookButton" class="item-button" onclick="toggleItem('ancient')"></button>
+  <button id="doomBookButton" class="item-button" onclick="toggleItem('doom')"></button>
+  <button id="goblinLensButton" class="item-button" onclick="toggleItem('lens')"></button>
+  <button id="specialButton" class="item-button" onclick="toggleItem('special')"></button>
 
-    <script>
-        let level = 1; 
-        const maxLevel = 16;
-        let successMultiplier = 1;
-        let failMultiplier = 1;
-        let usedBuff = false;
-        let usedNerf = false;
-        let usedDoom = false;
-        let usedLens = false;
-        let usedSpecial = false;
+  <script>
+    let level = 1; 
+    const maxLevel = 16;
+    let successMultiplier = 1;
+    let failMultiplier = 1;
+    let usedBuff = false;
+    let usedNerf = false;
+    let usedDoom = false;
+    let usedLens = false;
+    let usedSpecial = false;
+    let usedAncient = false;  // 고대의 제작서
 
-        const probabilities = {
-            1: { success: 100, fail: 0, destroy: 0 },
-            2: { success: 81.5, fail: 0, destroy: 0 },
-            3: { success: 66.4, fail: 0, destroy: 0 },
-            4: { success: 54.1, fail: 0, destroy: 0 },
-            5: { success: 44.1, fail: 27.9, destroy: 0 },
-            6: { success: 36, fail: 35.2, destroy: 0 },
-            7: { success: 29.3, fail: 42.4, destroy: 0 },
-            8: { success: 23.9, fail: 49.5, destroy: 0 },
-            9: { success: 17.4, fail: 59.6, destroy: 2 },
-            10: { success: 15.6, fail: 17.4, destroy: 3.5 },
-            11: { success: 15.1, fail: 65.3, destroy: 6.1 },
-            12: { success: 16.6, fail: 63.5, destroy: 10.7 },
-            13: { success: 3.7, fail: 68.8, destroy: 18.8 },
-            14: { success: 7, fail: 60.2, destroy: 32.8 },
-            15: { success: 5, fail: 56, destroy: 39 }
-        };
+    const probabilities = {
+      1: { success: 100, fail: 0, destroy: 0 },
+      2: { success: 81.5, fail: 0, destroy: 0 },
+      3: { success: 66.4, fail: 0, destroy: 0 },
+      4: { success: 54.1, fail: 0, destroy: 0 },
+      5: { success: 44.1, fail: 27.9, destroy: 0 },
+      6: { success: 36, fail: 35.2, destroy: 0 },
+      7: { success: 29.3, fail: 42.4, destroy: 0 },
+      8: { success: 23.9, fail: 49.5, destroy: 0 },
+      9: { success: 17.4, fail: 59.6, destroy: 2 },
+      10: { success: 15.6, fail: 17.4, destroy: 3.5 },
+      11: { success: 15.1, fail: 65.3, destroy: 6.1 },
+      12: { success: 16.6, fail: 63.5, destroy: 10.7 },
+      13: { success: 3.7, fail: 68.8, destroy: 18.8 },
+      14: { success: 7, fail: 60.2, destroy: 32.8 },
+      15: { success: 5, fail: 56, destroy: 39 }
+    };
 
-        function updateProbabilityDisplay() {
-            let { success, fail, destroy } = probabilities[level];
-            success *= successMultiplier;
-            fail *= failMultiplier;
+    function updateProbabilityDisplay() {
+      let { success, fail, destroy } = probabilities[level];
+      success *= successMultiplier;
+      fail *= failMultiplier;
+      
+      // 고대의 제작서 효과: 보석 파괴 확률 50% 감소
+      if (usedAncient) {
+        destroy *= 0.5;
+      }
 
-            if (usedDoom) {
-                fail = 0;
-                let total = success + destroy;
-                success = (success / total) * 100;
-                destroy = (destroy / total) * 100;
-            }
+      if (usedDoom) {
+        fail = 0;
+        let total = success + destroy;
+        success = (success / total) * 100;
+        destroy = (destroy / total) * 100;
+      }
 
-            if (usedLens) {
-                fail = 0;
-                destroy = 0;
-            }
+      if (usedLens) {
+        fail = 0;
+        destroy = 0;
+      }
 
-            let keep = Math.max(0, 100 - (success + fail + destroy));
+      let keep = Math.max(0, 100 - (success + fail + destroy));
 
-            document.getElementById("probabilityInfo").innerText =
-                `제련 성공: ${success.toFixed(1)}% | 등급 하락: ${fail.toFixed(1)}% | 보석 파괴: ${destroy.toFixed(1)}%`;
-        }
+      document.getElementById("probabilityInfo").innerText =
+        `제련 성공: ${success.toFixed(1)}% | 등급 하락: ${fail.toFixed(1)}% | 보석 파괴: ${destroy.toFixed(1)}%`;
+    }
 
-        function upgrade() {
-            if (level >= maxLevel) {
-                updateStatus("이미 최대 단계입니다!", "keep");
-                updateGemImage();
-                return;
-            }
+    function upgrade() {
+      if (level >= maxLevel) {
+        updateStatus("이미 최대 단계입니다!", "keep");
+        updateGemImage();
+        return;
+      }
 
-            let { success, fail, destroy } = probabilities[level];
+      let { success, fail, destroy } = probabilities[level];
+      success *= successMultiplier;
+      fail *= failMultiplier;
+      
+      if (usedAncient) {
+        destroy *= 0.5;
+      }
 
-            success *= successMultiplier;
-            fail *= failMultiplier;
+      if (usedDoom) {
+        fail = 0;
+        let total = success + destroy;
+        success = (success / total) * 100;
+        destroy = (destroy / total) * 100;
+      }
 
-            if (usedDoom) {
-                fail = 0;
-                let total = success + destroy;
-                success = (success / total) * 100;
-                destroy = (destroy / total) * 100;
-            }
+      if (usedLens) {
+        fail = 0;
+        destroy = 0;
+      }
 
-            if (usedLens) {
-                fail = 0;
-                destroy = 0;
-            }
+      let keep = Math.max(0, 100 - (success + fail + destroy));
 
-            let keep = Math.max(0, 100 - (success + fail + destroy));
+      let chance = Math.random() * 100;
 
-            let chance = Math.random() * 100;
+      if (chance < success) {
+        level++;
+        updateStatus(`강화 성공! 현재 단계: ${level}`, "success");
+      } else if (chance < success + keep) {
+        updateStatus(`강화 유지. 현재 단계: ${level}`, "keep");
+      } else if (chance < success + keep + fail) {
+        level = Math.max(1, level - 1);
+        updateStatus(`강화 실패! 현재 단계: ${level}`, "fail");
+      } else {
+        level = 1;
+        updateStatus("보석 파괴! 현재 단계: 1", "destroy");
+      }
 
-            if (chance < success) {
-                level++;
-                updateStatus(`강화 성공! 현재 단계: ${level}`, "success");
-            } else if (chance < success + keep) {
-                updateStatus(`강화 유지. 현재 단계: ${level}`, "keep");
-            } else if (chance < success + keep + fail) {
-                level = Math.max(1, level - 1);
-                updateStatus(`강화 실패! 현재 단계: ${level}`, "fail");
-            } else {
-                level = 1;
-                updateStatus("보석 파괴! 현재 단계: 1", "destroy");
-            }
+      document.getElementById("currentLevel").innerText = level;
 
-            document.getElementById("currentLevel").innerText = level;
+      // 아이템 효과 초기화
+      successMultiplier = 1;
+      failMultiplier = 1;
+      usedBuff = usedNerf = usedDoom = usedLens = usedSpecial = usedAncient = false;
+      updateButtonStates();
+      updateProbabilityDisplay();
+      updateGemImage(); // 강화 시도 후 보석 이미지 업데이트
+    }
 
-            // 아이템 효과 초기화
-            successMultiplier = 1;
-            failMultiplier = 1;
-            usedBuff = usedNerf = usedDoom = usedLens = usedSpecial = false;
-            updateButtonStates();
-            updateProbabilityDisplay();
-            updateGemImage(); // 강화 시도 후 보석 이미지 업데이트
-        }
+    function toggleItem(type) {
+      if (type === "special") {
+        usedSpecial = !usedSpecial;
+        successMultiplier = usedSpecial ? 2 : 1;
+      } else if (type === "buff") {
+        usedBuff = !usedBuff;
+        successMultiplier = usedBuff ? 1.5 : 1;
+      } else if (type === "nerf") {
+        usedNerf = !usedNerf;
+        failMultiplier = usedNerf ? 0.71 : 1;
+      } else if (type === "doom") {
+        usedDoom = !usedDoom;
+      } else if (type === "lens") {
+        usedLens = !usedLens;
+      } else if (type === "ancient") {
+        usedAncient = !usedAncient;
+      }
+      
+      updateProbabilityDisplay();
+      updateButtonStates();
+    }
 
-        function toggleItem(type) {
-            if (type === "special") {
-                usedSpecial = !usedSpecial;
-                successMultiplier = usedSpecial ? 2 : 1;
-            } else if (type === "buff") {
-                usedBuff = !usedBuff;
-                successMultiplier = usedBuff ? 1.5 : 1;
-            } else if (type === "nerf") {
-                usedNerf = !usedNerf;
-                failMultiplier = usedNerf ? 0.71 : 1;
-            } else if (type === "doom") {
-                usedDoom = !usedDoom;
-            } else if (type === "lens") {
-                usedLens = !usedLens;
-            } 
-            
-            updateProbabilityDisplay();
-            updateButtonStates();
-        }
+    function updateStatus(message, type) {
+      let statusMessage = document.getElementById("statusMessage");
+      statusMessage.innerText = message;
+      statusMessage.className = "status " + type;
+    }
 
-        function updateStatus(message, type) {
-            let statusMessage = document.getElementById("statusMessage");
-            statusMessage.innerText = message;
-            statusMessage.className = "status " + type;
-        }
+    // 보석 이미지 업데이트 함수: 현재 단계(level)에 해당하는 이미지(예: "13강.png")를 표시
+    function updateGemImage() {
+      const gemImage = document.getElementById("gemImage");
+      gemImage.src = level + "강.png";
+      gemImage.style.display = "block";
+    }
 
-        // 보석 이미지 업데이트 함수: 현재 단계(level)에 해당하는 이미지(예: "13강.png")를 표시
-        function updateGemImage() {
-            const gemImage = document.getElementById("gemImage");
-            gemImage.src = level + "강.png";
-            gemImage.style.display = "block";
-        }
+    // 각 아이템 버튼의 활성화 상태 업데이트
+    function updateButtonStates() {
+      document.getElementById("buffButton").classList.toggle("active", usedBuff);
+      document.getElementById("nerfButton").classList.toggle("active", usedNerf);
+      document.getElementById("doomBookButton").classList.toggle("active", usedDoom);
+      document.getElementById("goblinLensButton").classList.toggle("active", usedLens);
+      document.getElementById("specialButton").classList.toggle("active", usedSpecial);
+      document.getElementById("ancientBookButton").classList.toggle("active", usedAncient);
+    }
 
-        // 각 아이템 버튼의 활성화 상태 업데이트
-        function updateButtonStates() {
-            document.getElementById("buffButton").classList.toggle("active", usedBuff);
-            document.getElementById("nerfButton").classList.toggle("active", usedNerf);
-            document.getElementById("doomBookButton").classList.toggle("active", usedDoom);
-            document.getElementById("goblinLensButton").classList.toggle("active", usedLens);
-            document.getElementById("specialButton").classList.toggle("active", usedSpecial);
-        }
-
-        updateProbabilityDisplay();
-    </script>
+    updateProbabilityDisplay();
+  </script>
 
 </body>
 </html>
