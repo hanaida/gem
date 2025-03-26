@@ -11,9 +11,50 @@
         .keep { color: blue; }
         .fail { color: orange; }
         .destroy { color: red; }
-        .item-status { font-size: 18px; margin-top: 10px; color: purple; }
         .probability { font-size: 16px; margin-top: 10px; color: darkblue; }
         button:disabled { background-color: gray; color: white; cursor: not-allowed; }
+        
+        /* 기존 스타일 유지 */
+        button {
+            font-size: 12px;
+            padding: 5px 10px;
+            margin: 5px;
+        }
+
+        /* 아이템 버튼 스타일 (정사각형 + 이미지 적용) */
+        .item-button {
+            width: 80px;
+            height: 80px;
+            border: none;
+            background-size: cover;
+            background-position: center;
+            font-size: 0; /* 텍스트 숨김 */
+            transition: filter 0.2s;
+        }
+        /* 활성화된 아이템 버튼은 어둡게 표시 */
+        .active {
+            filter: brightness(70%);
+        }
+
+        #buffButton {
+            background-image: url('마법의_연마제.png');
+        }
+
+        #nerfButton {
+            background-image: url('명장의_망치.png');
+        }
+
+        #doomBookButton {
+            background-image: url('파멸의_제작서.png');
+        }
+
+        #goblinLensButton {
+            background-image: url('고블린의_렌즈.png');
+        }
+
+        #specialButton {
+            background-image: url('직업_제련템.png');
+        }
     </style>
 </head>
 <body>
@@ -22,14 +63,16 @@
     <p>현재 강화 단계: <span id="currentLevel">1</span></p>
     <p class="probability" id="probabilityInfo">강화 확률을 불러오는 중...</p>
     <p class="status" id="statusMessage">강화 대기 중...</p>
-    <p class="item-status" id="itemStatus">현재 적용 아이템: 없음</p>
+    <!-- 보석 상태 이미지를 위한 태그 추가 (가운데 정렬) -->
+    <img id="gemImage" src="" alt="보석 상태 이미지" style="display:none; margin: 20px auto 0; width:100px; height:100px;">
 
     <button onclick="upgrade()">강화하기</button>
     <br><br>
-    <button id="buffButton" onclick="toggleItem('buff')">마법의 연마제</button>
-    <button id="nerfButton" onclick="toggleItem('nerf')">명장의 망치</button>
-    <button id="doomBookButton" onclick="toggleItem('doom')">파멸의 제작서</button>
-    <button id="goblinLensButton" onclick="toggleItem('lens')">고블린의 렌즈</button>
+    <button id="buffButton" class="item-button" onclick="toggleItem('buff')"></button>
+    <button id="nerfButton" class="item-button" onclick="toggleItem('nerf')"></button>
+    <button id="doomBookButton" class="item-button" onclick="toggleItem('doom')"></button>
+    <button id="goblinLensButton" class="item-button" onclick="toggleItem('lens')"></button>
+    <button id="specialButton" class="item-button" onclick="toggleItem('special')"></button>
 
     <script>
         let level = 1; 
@@ -40,6 +83,7 @@
         let usedNerf = false;
         let usedDoom = false;
         let usedLens = false;
+        let usedSpecial = false;
 
         const probabilities = {
             1: { success: 100, fail: 0, destroy: 0 },
@@ -85,6 +129,7 @@
         function upgrade() {
             if (level >= maxLevel) {
                 updateStatus("이미 최대 단계입니다!", "keep");
+                updateGemImage();
                 return;
             }
 
@@ -119,35 +164,38 @@
                 updateStatus(`강화 실패! 현재 단계: ${level}`, "fail");
             } else {
                 level = 1;
-                updateStatus(`보석 파괴! 현재 단계: 1`, "destroy");
+                updateStatus("보석 파괴! 현재 단계: 1", "destroy");
             }
 
             document.getElementById("currentLevel").innerText = level;
 
+            // 아이템 효과 초기화
             successMultiplier = 1;
             failMultiplier = 1;
-            usedBuff = usedNerf = usedDoom = usedLens = false;
-            updateItemStatus("현재 적용 아이템: 없음");
+            usedBuff = usedNerf = usedDoom = usedLens = usedSpecial = false;
+            updateButtonStates();
             updateProbabilityDisplay();
+            updateGemImage(); // 강화 시도 후 보석 이미지 업데이트
         }
 
         function toggleItem(type) {
-            if (type === "buff") {
+            if (type === "special") {
+                usedSpecial = !usedSpecial;
+                successMultiplier = usedSpecial ? 2 : 1;
+            } else if (type === "buff") {
                 usedBuff = !usedBuff;
                 successMultiplier = usedBuff ? 1.5 : 1;
-                updateItemStatus(usedBuff ? "마법의 연마제 적용됨" : "마법의 연마제 해제됨");
             } else if (type === "nerf") {
                 usedNerf = !usedNerf;
                 failMultiplier = usedNerf ? 0.71 : 1;
-                updateItemStatus(usedNerf ? "명장의 망치 적용됨" : "명장의 망치 해제됨");
             } else if (type === "doom") {
                 usedDoom = !usedDoom;
-                updateItemStatus(usedDoom ? "파멸의 제작서 적용됨" : "파멸의 제작서 해제됨");
             } else if (type === "lens") {
                 usedLens = !usedLens;
-                updateItemStatus(usedLens ? "고블린의 렌즈 적용됨" : "고블린의 렌즈 해제됨");
-            }
+            } 
+            
             updateProbabilityDisplay();
+            updateButtonStates();
         }
 
         function updateStatus(message, type) {
@@ -156,8 +204,20 @@
             statusMessage.className = "status " + type;
         }
 
-        function updateItemStatus(message) {
-            document.getElementById("itemStatus").innerText = message;
+        // 보석 이미지 업데이트 함수: 현재 단계(level)에 해당하는 이미지(예: "13강.png")를 표시
+        function updateGemImage() {
+            const gemImage = document.getElementById("gemImage");
+            gemImage.src = level + "강.png";
+            gemImage.style.display = "block";
+        }
+
+        // 각 아이템 버튼의 활성화 상태 업데이트
+        function updateButtonStates() {
+            document.getElementById("buffButton").classList.toggle("active", usedBuff);
+            document.getElementById("nerfButton").classList.toggle("active", usedNerf);
+            document.getElementById("doomBookButton").classList.toggle("active", usedDoom);
+            document.getElementById("goblinLensButton").classList.toggle("active", usedLens);
+            document.getElementById("specialButton").classList.toggle("active", usedSpecial);
         }
 
         updateProbabilityDisplay();
